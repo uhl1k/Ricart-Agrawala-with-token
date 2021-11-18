@@ -1,6 +1,6 @@
 package cz.cvut.fel.dsv.distributedComputation.rmi;
 
-import cz.cvut.fel.dsv.distributedComputation.model.ClientID;
+import cz.cvut.fel.dsv.distributedComputation.model.NodeID;
 import java.rmi.Remote;
 import java.util.List;
 
@@ -17,31 +17,31 @@ public interface StubInterface extends Remote {
   void token();
 
   /**
-   * Client with given ID is disconnecting from network.
+   * Node with given ID is disconnecting from network.
    *
-   * @param clientID
+   * @param nodeID
    */
-  void disconnecting(ClientID clientID);
+  void disconnecting(NodeID nodeID);
 
   /**
    * Node with given ID is requesting the token.
    *
-   * @param clientID ID of the client requesting the token.
+   * @param nodeID ID of the client requesting the token.
    */
-  void request(ClientID clientID);
+  void request(NodeID nodeID);
 
   /**
    * New client with given ID is connecting to the network. Return him list of all known nodes.
    *
-   * @param clientID ID of the newly connected client.
+   * @param nodeID ID of the newly connected client.
    * @return List of all known clients.
    */
-  List<ClientID> connecting(ClientID clientID);
+  List<NodeID> connecting(NodeID nodeID);
 
   /**
    * Information that connection to some node dropped. This client must be removed from the network.
    *
-   * @param clientID ID of the dropped client.
+   * @param nodeID ID of the dropped client.
    */
-  void dropped(ClientID clientID);
+  void dropped(NodeID nodeID);
 }
