@@ -1,0 +1,4 @@
+- hosts: cluster
+  tasks:
+
+    - name: Restart service

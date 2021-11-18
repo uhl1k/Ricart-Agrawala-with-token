@@ -1,0 +1,22 @@
+- hosts: cluster
+  tasks:
+
+    - name: Remove old files
+      file:
+        state: "absent"
+        path: ""
+
+    - name: Copy program files and pom.xml
+      copy:
+        src: "."
+        dest: ""
+
+    - name: Build Maven project
+
+    - name: Stop old service
+
+    - name: Remove old service in init.d
+
+    - name: Create new service in init.d
+
+    - name: Start new service
