@@ -63,10 +63,10 @@ public class NodeID implements Comparable<NodeID> {
     }
 
     //  let's compare the bytes, first address having bigger byte is bigger
-    for (int i = 0; i < 4; i++) {
-      if (leftBytes[i] < rightBytes[i]) {
+    for (int i = 0; i < leftBytes.length; i++) {
+      if (Byte.toUnsignedInt(leftBytes[i]) < Byte.toUnsignedInt(rightBytes[i])) {
         return -1;
-      } else if (leftBytes[i] > rightBytes[i]) {
+      } else if (Byte.toUnsignedInt(leftBytes[i]) > Byte.toUnsignedInt(rightBytes[i])) {
         return 1;
       }
     }
@@ -84,7 +84,10 @@ public class NodeID implements Comparable<NodeID> {
 
   @Override
   public String toString() {
-    return address.toString() + ":" + port;
+    if (getAddressBytes().length == 4) {
+      return address.toString().substring(1) + ":" + port;
+    }
+    return "[" + address.toString().substring(1) + "]:" + port;
   }
 
   @Override
@@ -106,7 +109,7 @@ public class NodeID implements Comparable<NodeID> {
     var bytes = getAddressBytes();
     int sum = 0;
     for (int i = 0; i < bytes.length; i++) {
-      sum += bytes[i];
+      sum += Byte.toUnsignedInt(bytes[i]);
     }
     //  and add port on top of it
     return sum + port;
