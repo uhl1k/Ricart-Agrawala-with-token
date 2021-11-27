@@ -1,33 +1,13 @@
 package cz.cvut.fel.dsv.distributedComputation;
 
-import java.util.Date;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import cz.cvut.fel.dsv.distributedComputation.server.Server;
+import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.Scanner;
 
 /** This is the main class of the Distributed Computation. */
 public class Main {
-
-  /** Logger for logging messages into the console. */
-  private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-
-  /** Static initializer to initialise the logger. */
-  static {
-    LOGGER.setUseParentHandlers(false);
-    ConsoleHandler handler = new ConsoleHandler();
-    handler.setFormatter(
-        new Formatter() {
-          //  The format is: YYYY-MM-DD HH:MM:SS: [ _x_ ] _message_
-          private static final String format = "%1$tF %1$tT: %2$s %n";
-
-          @Override
-          public String format(LogRecord record) {
-            return String.format(format, new Date(record.getMillis()), record.getMessage());
-          }
-        });
-    LOGGER.addHandler(handler);
-  }
 
   /**
    * Main method of the program for Distributed Computing.
@@ -35,6 +15,47 @@ public class Main {
    * @param args
    */
   public static void main(String... args) {
-    LOGGER.info(() -> "[ ↺ ] Distributed Computation is starting ...");
+    Scanner scanner = new Scanner(System.in);
+    boolean run = true;
+
+    while (run) {
+      System.out.println();
+      System.out.println("1 - Start node");
+      System.out.println("2 - Exit");
+      System.out.println();
+      System.out.print("Select option: ");
+
+      int option = 0;
+
+      try {
+        option = Integer.parseInt(scanner.nextLine());
+      } catch (NumberFormatException ex) {
+        System.out.println("Enter a number! (" + ex.getMessage() + ")");
+        continue;
+      }
+
+      switch (option) {
+        case 1:
+          try {
+            new Server();
+          } catch (RemoteException e) {
+            e.printStackTrace();
+          } catch (UnknownHostException e) {
+            e.printStackTrace();
+          } catch (NotBoundException e) {
+            e.printStackTrace();
+          }
+          break;
+
+        case 2:
+          run = false;
+          break;
+
+        default:
+          System.out.println("Unknown option!");
+          break;
+      }
+    }
+    System.out.println("Good bye.");
   }
 }

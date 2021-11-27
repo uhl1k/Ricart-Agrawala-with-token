@@ -1,6 +1,12 @@
 package cz.cvut.fel.dsv.distributedComputation.model;
 
+import cz.cvut.fel.dsv.distributedComputation.rmi.StubInterface;
+import cz.cvut.fel.dsv.distributedComputation.server.Server;
 import java.net.InetAddress;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 /**
  * Representation of node in the program containing all information and connections.
@@ -9,9 +15,12 @@ import java.net.InetAddress;
  */
 public class Node implements Comparable<Node> {
   private final NodeID nodeID;
+  private final StubInterface remote;
 
-  private Node(NodeID nodeID) {
+  private Node(NodeID nodeID) throws RemoteException, NotBoundException {
     this.nodeID = nodeID;
+    Registry registry = LocateRegistry.getRegistry(nodeID.getAddress().toString(), nodeID.getPort());
+    remote = (StubInterface) registry.lookup(Server.DSV_REGISTRY_NAME);
   }
 
   /**
@@ -20,7 +29,7 @@ public class Node implements Comparable<Node> {
    * @param nodeID ID to create from.
    * @return Newly created Node.
    */
-  public static Node getNodeFromNodeID(NodeID nodeID) {
+  public static Node getNodeFromNodeID(NodeID nodeID) throws NotBoundException, RemoteException {
     return new Node(nodeID);
   }
 
@@ -32,7 +41,7 @@ public class Node implements Comparable<Node> {
    * @param port Port number of the new node.
    * @return Newly created node.
    */
-  public static Node getNodeFromAddressAndPort(InetAddress address, int port) {
+  public static Node getNodeFromAddressAndPort(InetAddress address, int port) throws NotBoundException, RemoteException {
     return new Node(new NodeID(address, port));
   }
 
@@ -43,6 +52,10 @@ public class Node implements Comparable<Node> {
    */
   public NodeID getNodeID() {
     return nodeID;
+  }
+
+  public StubInterface getRemote() {
+    return remote;
   }
 
   @Override
