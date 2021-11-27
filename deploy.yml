@@ -1,19 +1,20 @@
 - hosts: cluster
   tasks:
 
-    - name: Remove old policy file
+    - name: Remove old JAR
       file:
         state: "absent"
-        path: "/dsv.policy"
+        path: "/dsv.jar"
 
     - name: Copy new JAR
       copy:
         src: "./target/distributedComputation-0.8 ALPHA.jar"
         dest: "/dsv.jar"
-    - name: Remove old JAR
+
+    - name: Remove old policy file
       file:
         state: "absent"
-        path: "/dsv.jar"
+        path: "/dsv.policy"
 
     - name: Copy new policy file
       copy:
