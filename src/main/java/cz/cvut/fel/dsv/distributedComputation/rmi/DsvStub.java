@@ -2,10 +2,13 @@ package cz.cvut.fel.dsv.distributedComputation.rmi;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.Map;
 
 public interface DsvStub extends Remote, Serializable {
-  void connected(InetAddress address, int port);
-  Map<InetAddress, Integer> connecting(InetAddress address, int port);
+  void connected(InetAddress address);
+  Map<InetAddress, Integer> connecting(InetAddress address) throws RemoteException, NotBoundException, MalformedURLException;
 }
