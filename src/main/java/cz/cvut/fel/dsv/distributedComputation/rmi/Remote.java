@@ -1,6 +1,5 @@
-package cz.cvut.fel.dsv.distributedComputation;
+package cz.cvut.fel.dsv.distributedComputation.rmi;
 
-import cz.cvut.fel.dsv.distributedComputation.rmi.DsvStub;
 import java.net.InetAddress;
 
 public class Remote {
