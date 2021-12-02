@@ -12,13 +12,12 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 public class Server {
 
-  public static final int PORT = 1000;
+  public static final int PORT = 2010;
 
   public static final String NAME = "dsv";
 
@@ -59,15 +58,23 @@ public class Server {
         System.out.println("Not a valid IP address!");
         continue;
       }
+      System.out.println("Moje ip " + address.getHostAddress());
       break;
     }
 
+    /*if (System.getSecurityManager() == null) {
+      System.setSecurityManager(new SecurityManager());
+    }*/
+		//System.setProperty("java.security.policy","file:///dsv.policy");
+    //System.setProperty("java.rmi.server.hostname", address.getHostAddress());
+    System.out.println("Creating registry at " + PORT);
     registry = LocateRegistry.createRegistry(PORT);
+    System.out.println("Binding stub " + NAME);
     registry.rebind(NAME, new DsvImplementation());
 
     while (true) {
       System.out.print("Connect to another node? [y/n]: ");
-      var option = scanner.nextLine();
+      String option = scanner.nextLine();
       if (option.equalsIgnoreCase("y")) {
         connectToOtherNode();
         break;
@@ -91,8 +98,12 @@ public class Server {
       break;
     }
     Remote remote = new Remote();
+    System.out.println("IP adresa " + connectTo.getHostAddress());
     remote.setAddress(connectTo);
-    remote.setRemote((DsvStub) LocateRegistry.getRegistry(connectTo.getHostAddress(), PORT).lookup(NAME));
+    Registry registry = LocateRegistry.getRegistry(connectTo.getHostAddress(), PORT);
+    System.out.println(registry);
+    remote.setRemote((DsvStub) registry.lookup(NAME));
+    System.out.println(remote.getRemote());
     remote.getRemote().connecting(address);
     remotes.add(remote);
   }

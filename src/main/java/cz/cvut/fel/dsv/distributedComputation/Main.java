@@ -13,7 +13,7 @@ public class Main {
   private static Scanner scanner = new Scanner(System.in);
 
   public static void main(String... args) {
-    var run = true;
+    boolean run = true;
     while (run) {
       switch (printMenu()) {
         case 0:
@@ -75,7 +75,7 @@ public class Main {
       System.out.print("Enter your option: ");
 
       try {
-        var option = Integer.parseInt(scanner.nextLine());
+        int option = Integer.parseInt(scanner.nextLine());
         if (option < 0 || option > 7) {
           throw new NumberFormatException();
         }
