@@ -24,6 +24,6 @@ public class Remote {
 
   @Override
   public String toString() {
-    return address.getHostAddress();
+    return getAddress().getHostAddress();
   }
 }

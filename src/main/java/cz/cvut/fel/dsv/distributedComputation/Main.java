@@ -1,6 +1,7 @@
 package cz.cvut.fel.dsv.distributedComputation;
 
 import cz.cvut.fel.dsv.distributedComputation.exceptions.AlreadyStartedException;
+import cz.cvut.fel.dsv.distributedComputation.exceptions.AlreadyStoppedException;
 import cz.cvut.fel.dsv.distributedComputation.rmi.Server;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
@@ -10,7 +11,7 @@ import java.util.Scanner;
 
 public class Main {
 
-  private static Scanner scanner = new Scanner(System.in);
+  private static final Scanner scanner = new Scanner(System.in);
 
   public static void main(String... args) {
     boolean run = true;
@@ -28,9 +29,23 @@ public class Main {
           break;
 
         case 1:
+          try {
+            Server.getInstance().stop();
+          } catch (AlreadyStoppedException ex) {
+            System.out.println("Could not stop server because it is not running.");
+          } catch (RemoteException | NotBoundException ex) {
+            System.out.println("Could not drop because: " + ex.getMessage());
+          }
           break;
 
         case 2:
+          try {
+            Server.getInstance().drop();
+          } catch (AlreadyStoppedException ex) {
+            System.out.println("Could not drop because server is not running.");
+          } catch (NotBoundException | RemoteException ex) {
+            System.out.println("Could not drop because: " + ex.getMessage());
+          }
           break;
 
         case 3:
@@ -43,17 +58,23 @@ public class Main {
           break;
 
         case 6:
+          System.out.println(Server.getInstance().hasToken()?"This node has token.":"This node does not have token.");
           break;
 
         case 7:
+          Server.getInstance().generateToken();
           break;
 
         case 8:
+          if (Server.getInstance().isRunning()) {
+            System.out.println("Cannot terminate. Shut down the server first.");
+            break;
+          }
           run = false;
           break;
 
         default:
-          System.out.println("Unknown number!");
+          System.out.println("Unknown option!");
       }
     }
   }

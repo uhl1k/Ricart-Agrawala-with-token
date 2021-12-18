@@ -6,9 +6,9 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Map;
+import java.util.List;
 
 public interface DsvStub extends Remote, Serializable {
-  void connected(InetAddress address) throws RemoteException;
-  Map<InetAddress, Integer> connecting(InetAddress address) throws RemoteException, NotBoundException, MalformedURLException;
+  List<InetAddress> connecting(InetAddress address) throws RemoteException, NotBoundException, MalformedURLException;
+  void disconnecting(InetAddress address) throws RemoteException;
 }
