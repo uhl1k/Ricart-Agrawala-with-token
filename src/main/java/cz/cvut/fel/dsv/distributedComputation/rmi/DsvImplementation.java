@@ -11,7 +11,7 @@ import java.util.Map;
 import static cz.cvut.fel.dsv.distributedComputation.rmi.Server.NAME;
 import static cz.cvut.fel.dsv.distributedComputation.rmi.Server.PORT;
 
-public class DsvImplementation implements DsvStub {
+public class DsvImplementation extends UnicastRemoteObject implements DsvStub {
   protected DsvImplementation() throws RemoteException {
   }
 

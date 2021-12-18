@@ -9,6 +9,6 @@ import java.rmi.RemoteException;
 import java.util.Map;
 
 public interface DsvStub extends Remote, Serializable {
-  void connected(InetAddress address);
+  void connected(InetAddress address) throws RemoteException;
   Map<InetAddress, Integer> connecting(InetAddress address) throws RemoteException, NotBoundException, MalformedURLException;
 }

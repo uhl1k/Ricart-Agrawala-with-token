@@ -34,10 +34,11 @@ public class Main {
           break;
 
         case 3:
+          System.out.println("Server is " + (Server.getInstance().isRunning()?"running":"stopped") + ".");
           break;
 
         case 4:
-          System.out.println("Remotes: ");
+          System.out.println("Remotes [" + Server.getInstance().getRemotes().size() + "]: ");
           Server.getInstance().getRemotes().forEach(r -> System.out.println("  " + r));
           break;
 
