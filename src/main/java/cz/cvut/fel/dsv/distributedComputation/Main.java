@@ -57,6 +57,10 @@ public class Main {
           Server.getInstance().getRemotes().forEach(r -> System.out.println("  " + r));
           break;
 
+        case 5:
+          Server.getInstance().editVariable();
+          break;
+
         case 6:
           System.out.println(Server.getInstance().hasToken()?"This node has token.":"This node does not have token.");
           break;

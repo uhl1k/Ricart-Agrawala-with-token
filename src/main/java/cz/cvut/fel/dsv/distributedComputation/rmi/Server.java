@@ -10,9 +10,10 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.UUID;
 
 public class Server {
 
@@ -26,7 +27,7 @@ public class Server {
 
   private boolean running;
 
-  private final List<Remote> remotes;
+  private final SortedSet<Remote> remotes;
 
   private InetAddress address;
 
@@ -34,11 +35,21 @@ public class Server {
 
   private Registry localRegistry;
 
+  private int clock;
+
+  private boolean cs;
+
+  private UUID uuid;
+
+
   private Server() {
     running = false;
-    remotes = new ArrayList<>();
+    remotes = new TreeSet<>();
     scanner = new Scanner(System.in);
     token = false;
+    clock = 0;
+    cs = false;
+    uuid = UUID.randomUUID();
   }
 
   public static Server getInstance() {
@@ -81,6 +92,10 @@ public class Server {
     }
   }
 
+  public UUID getUuid() {
+    return uuid;
+  }
+
   private void connectToOtherNode() throws NotBoundException, RemoteException, MalformedURLException {
     InetAddress connectTo;
     while (true) {
@@ -97,7 +112,8 @@ public class Server {
     remote.setAddress(connectTo);
     Registry registry = LocateRegistry.getRegistry(connectTo.getHostAddress(), PORT);
     remote.setRemote((DsvStub) registry.lookup(NAME));
-    var network = remote.getRemote().connecting(address);
+    remote.setUuid(remote.getRemote().getUUID());
+    var network = remote.getRemote().connecting(address, uuid);
 
     System.out.println("Received remotes from " + connectTo.getHostAddress() + " [" + network.size() + "]:");
     network.forEach(addr -> {
@@ -106,7 +122,8 @@ public class Server {
       try {
         var reg = LocateRegistry.getRegistry(rem.getAddress().getHostAddress(), PORT);
         rem.setRemote((DsvStub) reg.lookup(NAME));
-        rem.getRemote().connecting(address);
+        rem.getRemote().connecting(address, uuid);
+        rem.setUuid(rem.getRemote().getUUID());
         remotes.add(rem);
         System.out.println("Successfully connected to " + rem.getAddress().getHostAddress() + ".");
       } catch (RemoteException | NotBoundException | MalformedURLException ex) {
@@ -138,13 +155,24 @@ public class Server {
     running = false;
     localRegistry.unbind(NAME);
     remotes.clear();
+    token = false;
+    clock = 0;
+    cs = false;
+  }
+
+  public void editVariable() {
+
+  }
+
+  public void receivedRequest() {
+
   }
 
   public boolean isRunning() {
     return running;
   }
 
-  public List<Remote> getRemotes() {
+  public SortedSet<Remote> getRemotes() {
     return remotes;
   }
 

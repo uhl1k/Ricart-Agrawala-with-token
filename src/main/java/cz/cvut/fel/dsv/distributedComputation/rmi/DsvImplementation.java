@@ -7,6 +7,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static cz.cvut.fel.dsv.distributedComputation.rmi.Server.NAME;
 import static cz.cvut.fel.dsv.distributedComputation.rmi.Server.PORT;
@@ -21,12 +23,18 @@ public class DsvImplementation extends UnicastRemoteObject implements DsvStub {
   }
 
   @Override
-  public List<InetAddress> connecting(InetAddress address) throws RemoteException, NotBoundException {
+  public List<InetAddress> connecting(InetAddress address, UUID uuid) throws RemoteException, NotBoundException {
     System.out.println("Incomming from: " + address.getHostAddress());
     Remote remote = new Remote();
     remote.setAddress(address);
+    remote.setUuid(uuid);
     remote.setRemote((DsvStub) LocateRegistry.getRegistry(address.getHostAddress(), PORT).lookup(NAME));
     Server.getInstance().addRemote(remote);
-    return new ArrayList<>();
+    return Server.getInstance().getRemotes().stream().filter(r -> r.getUuid() != remote.getUuid()).map(r -> r.getAddress()).collect(Collectors.toList());
+  }
+
+  @Override
+  public UUID getUUID() {
+    return Server.getInstance().getUuid();
   }
 }
