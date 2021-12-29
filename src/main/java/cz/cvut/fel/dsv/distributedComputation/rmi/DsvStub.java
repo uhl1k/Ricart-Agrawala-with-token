@@ -13,4 +13,6 @@ public interface DsvStub extends Remote, Serializable {
   List<InetAddress> connecting(InetAddress address, UUID uuid) throws RemoteException, NotBoundException, MalformedURLException;
   void disconnecting(InetAddress address) throws RemoteException;
   UUID getUUID() throws RemoteException;
+  void token() throws RemoteException;
+  void request(UUID uuid, int clock) throws RemoteException;
 }

@@ -10,6 +10,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -27,7 +29,7 @@ public class Server {
 
   private boolean running;
 
-  private final SortedSet<Remote> remotes;
+  private final List<Remote> remotes;
 
   private InetAddress address;
 
@@ -41,15 +43,17 @@ public class Server {
 
   private UUID uuid;
 
+  private Object lock;
 
   private Server() {
     running = false;
-    remotes = new TreeSet<>();
+    remotes = new ArrayList<>();
     scanner = new Scanner(System.in);
     token = false;
     clock = 0;
     cs = false;
     uuid = UUID.randomUUID();
+    lock = new Object();
   }
 
   public static Server getInstance() {
@@ -164,15 +168,35 @@ public class Server {
 
   }
 
-  public void receivedRequest() {
+  public void receivedRequest(Remote remote, int clock) {
+    remote.setRequestedAt(Math.max(clock, remote.getRequestedAt()));
+    synchronized (lock) {
+      if (token && !cs) {
+        var index = getRemoteBehindMe();
+        do {
+          if ((remotes.get(index).getRequestedAt() > remotes.get(index).getTokenAt()) && token) {
+            try {
+              remotes.get(index).getRemote().token();
+              token = false;
+            } catch (RemoteException ex) {
 
+            }
+          }
+          index = (index + 1) % remotes.size();
+        } while (index != getRemoteBehindMe());
+      }
+    }
+  }
+
+  private int getRemoteBehindMe() {
+    return 0;
   }
 
   public boolean isRunning() {
     return running;
   }
 
-  public SortedSet<Remote> getRemotes() {
+  public List<Remote> getRemotes() {
     return remotes;
   }
 

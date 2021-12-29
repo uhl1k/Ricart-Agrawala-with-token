@@ -37,4 +37,19 @@ public class DsvImplementation extends UnicastRemoteObject implements DsvStub {
   public UUID getUUID() {
     return Server.getInstance().getUuid();
   }
+
+  @Override
+  public void request(UUID uuid, int clock) throws RemoteException {
+    var remote = Server.getInstance().getRemotes().stream().filter(r -> r.getUuid().equals(uuid)).findFirst();
+    if (remote.isPresent()) {
+      Server.getInstance().receivedRequest(remote.get(), clock);
+    } else  {
+      throw new RemoteException("Could not find remote with given uuid!");
+    }
+  }
+
+  @Override
+  public void token() throws RemoteException {
+    Server.getInstance().generateToken();
+  }
 }
