@@ -176,6 +176,7 @@ public class Server {
   }
 
   public void editVariable() {
+    var dropped = new ArrayList<Remote>();
     synchronized (lock) {
       if (!token) {
         clock++;
@@ -183,7 +184,7 @@ public class Server {
           try {
             r.getRemote().request(uuid, clock);
           } catch (RemoteException e) {
-            e.printStackTrace();
+            dropped.add(r);
           }
         });
         while (!token) {
@@ -201,7 +202,9 @@ public class Server {
           try {
             r.getRemote().setVariable(variable);
           } catch (RemoteException e) {
-            e.printStackTrace();
+            if (!dropped.contains(r)) {
+              dropped.add(r);
+            }
           }
         });
         break;
@@ -213,6 +216,7 @@ public class Server {
       cs = false;
     }
     passToken();
+    droppedNodes(dropped);
   }
 
   public void receivedRequest(Remote remote, int clock) {
@@ -226,6 +230,7 @@ public class Server {
 
   private void passToken() {
     var index = getRemoteBehindMe();
+    var dropped = new ArrayList<Remote>();
     do {
       if ((remotes.get(index).getRequestedAt() > remotes.get(index).getTokenAt()) && token) {
         try {
@@ -233,11 +238,12 @@ public class Server {
           remotes.get(index).setTokenAt(remotes.get(index).getRequestedAt());
           token = false;
         } catch (RemoteException ex) {
-
+          dropped.add(remotes.get(index));
         }
       }
       index = (index + 1) % remotes.size();
     } while (index != getRemoteBehindMe());
+    droppedNodes(dropped);
   }
 
   private int getRemoteBehindMe() {
@@ -273,5 +279,18 @@ public class Server {
         it.remove();
       }
     }
+  }
+
+  public void droppedNodes(List<Remote> nodes) {
+    nodes.forEach(n -> remotes.remove(n));
+    remotes.forEach(r -> {
+      nodes.forEach(n -> {
+        try {
+          r.getRemote().dropped(n.getAddress());
+        } catch (RemoteException e) {
+          //  No doufám, že tohle nenastane ...
+        }
+      });
+    });
   }
 }

@@ -49,6 +49,11 @@ public class DsvImplementation extends UnicastRemoteObject implements DsvStub {
   }
 
   @Override
+  public void dropped(InetAddress address) throws RemoteException {
+    Server.getInstance().removeRemote(address);
+  }
+
+  @Override
   public void token() throws RemoteException {
     Server.getInstance().generateToken();
     System.out.println("Token received.");
