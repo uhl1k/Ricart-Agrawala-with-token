@@ -103,7 +103,7 @@ public class Main {
 
       try {
         int option = Integer.parseInt(scanner.nextLine());
-        if (option < 0 || option > 7) {
+        if (option < 0 || option > 8) {
           throw new NumberFormatException();
         }
         return option;
