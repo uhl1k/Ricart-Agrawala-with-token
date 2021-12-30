@@ -15,4 +15,6 @@ public interface DsvStub extends Remote, Serializable {
   UUID getUUID() throws RemoteException;
   void token() throws RemoteException;
   void request(UUID uuid, int clock) throws RemoteException;
+  void setVariable(int value) throws RemoteException;
+  int getVariable() throws RemoteException;
 }

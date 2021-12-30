@@ -11,10 +11,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.UUID;
 
 public class Server {
@@ -45,6 +44,8 @@ public class Server {
 
   private Object lock;
 
+  private int variable;
+
   private Server() {
     running = false;
     remotes = new ArrayList<>();
@@ -54,6 +55,7 @@ public class Server {
     cs = false;
     uuid = UUID.randomUUID();
     lock = new Object();
+    variable = 0;
   }
 
   public static Server getInstance() {
@@ -117,6 +119,7 @@ public class Server {
     Registry registry = LocateRegistry.getRegistry(connectTo.getHostAddress(), PORT);
     remote.setRemote((DsvStub) registry.lookup(NAME));
     remote.setUuid(remote.getRemote().getUUID());
+    variable = remote.getRemote().getVariable();
     var network = remote.getRemote().connecting(address, uuid);
 
     System.out.println("Received remotes from " + connectTo.getHostAddress() + " [" + network.size() + "]:");
@@ -164,28 +167,77 @@ public class Server {
     cs = false;
   }
 
-  public void editVariable() {
+  public int getVariable() {
+    return variable;
+  }
 
+  public void setVariable(int variable) {
+    this.variable = variable;
+  }
+
+  public void editVariable() {
+    synchronized (lock) {
+      if (!token) {
+        clock++;
+        remotes.forEach(r -> {
+          try {
+            r.getRemote().request(uuid, clock);
+          } catch (RemoteException e) {
+            e.printStackTrace();
+          }
+        });
+        while (!token) {
+        }
+      }
+      cs = true;
+    }
+
+    while (true) {
+      try {
+        System.out.println("Current value of the variable is: " + variable);
+        System.out.print("Enter a new value of the variable: ");
+        variable = Integer.parseInt(scanner.nextLine());
+        remotes.forEach(r -> {
+          try {
+            r.getRemote().setVariable(variable);
+          } catch (RemoteException e) {
+            e.printStackTrace();
+          }
+        });
+        break;
+      } catch (NumberFormatException ex) {
+        System.out.println("Not a valid number!");
+      }
+    }
+    synchronized (lock) {
+      cs = false;
+    }
+    passToken();
   }
 
   public void receivedRequest(Remote remote, int clock) {
     remote.setRequestedAt(Math.max(clock, remote.getRequestedAt()));
     synchronized (lock) {
       if (token && !cs) {
-        var index = getRemoteBehindMe();
-        do {
-          if ((remotes.get(index).getRequestedAt() > remotes.get(index).getTokenAt()) && token) {
-            try {
-              remotes.get(index).getRemote().token();
-              token = false;
-            } catch (RemoteException ex) {
-
-            }
-          }
-          index = (index + 1) % remotes.size();
-        } while (index != getRemoteBehindMe());
+        passToken();
       }
     }
+  }
+
+  private void passToken() {
+    var index = getRemoteBehindMe();
+    do {
+      if ((remotes.get(index).getRequestedAt() > remotes.get(index).getTokenAt()) && token) {
+        try {
+          remotes.get(index).getRemote().token();
+          remotes.get(index).setTokenAt(remotes.get(index).getRequestedAt());
+          token = false;
+        } catch (RemoteException ex) {
+
+        }
+      }
+      index = (index + 1) % remotes.size();
+    } while (index != getRemoteBehindMe());
   }
 
   private int getRemoteBehindMe() {
@@ -202,6 +254,7 @@ public class Server {
 
   public void addRemote(Remote remote) {
     remotes.add(remote);
+    Collections.sort(remotes);
   }
 
   public boolean hasToken() {
@@ -210,7 +263,6 @@ public class Server {
 
   public void generateToken() {
     token = true;
-    System.out.println("Token generated.");
   }
 
   public void removeRemote(InetAddress address) {

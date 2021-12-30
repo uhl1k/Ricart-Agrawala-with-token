@@ -51,5 +51,16 @@ public class DsvImplementation extends UnicastRemoteObject implements DsvStub {
   @Override
   public void token() throws RemoteException {
     Server.getInstance().generateToken();
+    System.out.println("Token received.");
+  }
+
+  @Override
+  public void setVariable(int value) {
+    Server.getInstance().setVariable(value);
+  }
+
+  @Override
+  public int getVariable() {
+    return Server.getInstance().getVariable();
   }
 }

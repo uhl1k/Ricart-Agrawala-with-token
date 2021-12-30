@@ -18,8 +18,54 @@
     Invocation}. Zdrojové kódy projektu jsou dostupné na fakultním GitLabu
     \footnote{\url{https://gitlab.fel.cvut.cz/jankurom/dsv-semestral-work}}.
 
-    \section*{Zjednodušení}
+    Vše důležité se odehrává ve třídě \texttt{Server}. Tato třída si pamatuje všechny nody v síti a v ní je
+    naimplementovaný Ricart-Agrawala algoritmus. Ovládat node lze pomocí veřejných metod na této třídě:
 
-    \section*{Funkcionalita }
+    \begin{itemize}
+        \item \texttt{getInstance()} vrací jedinou instanci třídy \texttt{Server}, protože tato třída je singleton.
+        \item \texttt{start()} nastartuje node a připojí ho do sítě. Pokud je node už nastartovaný, je vyvolána
+        výjimka. Při spouštění se node zeptá na adresu a pak na této adrese vytvoří RMI registr. Pak se zeptá, jestli
+        se má připojit do již existující sítě. Pokud ano, zeptá se na adresu libovolného nodu v této síti a připojí
+        se k němu. Po zavolání metody \texttt{connecting()} získá seznam všech nodů v síti a připojí se k nim.
+        \item \texttt{getUuid()} returns UUID of this node.
+        \item \texttt{drop()} terminates node without notifying other nodes in network. It also resets node to 
+        initial state.
+        \item \texttt{stop()} informuje všechny nody v síti, že končí a pak zavolá metodu \texttt{drop()}.
+        \item \texttt{editVariable()} spustí editaci sdílené proměnné. Pokud node nemá token, rozešle žádost všem 
+        ostatním nodům, počká na odpověď, vstoupí do kritické sekce, upraví proměnnou a předá token dál (pokud je komu).
+        \item \texttt{receivedRequest()} je voláno, když node přijme žádost od jiného nodu. Pokud má node token, tak 
+        ho předá. Jinak si jen zapamatuje žádost.
+        \item \texttt{isRunning()} vrátí TRUE, když node běží a FALSE když ne.
+        \item \texttt{getRemotes()} vrátí seznam všech nodů v síti.
+        \item \texttt{addRemote()} přidá node do seznamu a připojí se k němu.
+        \item \texttt{hasToken()} vrátí TRUE, když node má token, jinak vrátí FALSE.
+        \item \texttt{generateToken()} vygeneruje token na tomto nodu.
+        \item \texttt{removeRemote()} odstraní node ze seznamu a odpojí se od něho.
+    \end{itemize}
+
+    Pokud je během provádění libovolné metody kroku detekován node, který po zavolání metody přes RMI vrátí Remote
+    exception, je tento node vyřazen ze seznamu a všichni jsou o této chybě informováni. Tento node se totiž s
+    největší pravděpodobností odpojil ze sítě, aniž by dal ostatním nodům v síti vědět.
+
+    Třída \texttt{Remote} je jakýmsi obalem, který obsahuje adresu nodu, odkaz na jeho implementaci, UUID nodu, a
+    hodiny, kdy node žádal o token a kdy ho dostal. Pro hezký výpis je implementována metoda \texttt{toString} a pro
+    účely řazení je implementovány metody \texttt{compareTo()} a \texttt{equals()}.
+
+    \texttt{DsvStub} a \texttt{DsvImplementation} slouží pro komunikaci pomocí Java RMI. Naprogramoval jsem
+    následující metody:
+
+    \begin{itemize}
+        \item \texttt{disconnecting()} volá node, když se dopojuje ze sítě, aby informoval všechny ostatní v síti.
+        \item \texttt{connecting()} volá node při připojování do sítě. Informuje tím o svém připojení a získává
+        seznam všech nodů v síti.
+        \item \texttt{getUUID()} získá UUID volaného nodu.
+        \item \texttt{request()} je používán Ricart-Agrawala algoritmem pro žádání o token. Tato metoda volá
+        \texttt{receivedRequest()} na serveru, který předá token (pokud nějaký má).
+        \item \texttt{token()} slouží k předání token v algoritmu.
+    \end{itemize}
+
+    Třída \texttt{Main} obsahuje metodu \texttt{main()}, která spouští node a také obsahuje interface k serveru.
+    Třídy \texttt{AlreadyStartedException} a \texttt{AlreadyStoppedException} jsou vyvolávány serverem, pokud dojde k
+    chybě.
 
 \end{document}

@@ -67,6 +67,7 @@ public class Main {
 
         case 7:
           Server.getInstance().generateToken();
+          System.out.println("Token generated.");
           break;
 
         case 8:
