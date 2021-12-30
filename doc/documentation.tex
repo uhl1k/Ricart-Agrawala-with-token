@@ -41,6 +41,9 @@
         \item \texttt{hasToken()} vrátí TRUE, když node má token, jinak vrátí FALSE.
         \item \texttt{generateToken()} vygeneruje token na tomto nodu.
         \item \texttt{removeRemote()} odstraní node ze seznamu a odpojí se od něho.
+        \item \texttt{droppedNodes()} odstraní předané nody ze seznamu nodů a informuje všechny ostatní o jejich
+        odstranění. Je volána metodami, které pracují s nody a tyto metody střádají seznam nodů, které jsou
+        nedostupné a pak tento seznam předají této metodě.
     \end{itemize}
 
     Pokud je během provádění libovolné metody kroku detekován node, který po zavolání metody přes RMI vrátí Remote
@@ -62,6 +65,10 @@
         \item \texttt{request()} je používán Ricart-Agrawala algoritmem pro žádání o token. Tato metoda volá
         \texttt{receivedRequest()} na serveru, který předá token (pokud nějaký má).
         \item \texttt{token()} slouží k předání token v algoritmu.
+        \item \texttt{setVariable()} nastaví proměnnou na nodu na aktuální hodnotu. Volána nodem v kritické sekci po
+        změně hodnoty.
+        \item \texttt{getVariable()} Vrátí aktuální hodnotu proměnné.
+        \item \texttt{dropped()} je volána nodem aby informoval ostatní nody, že jiný node vypadl ze sítě.
     \end{itemize}
 
     Třída \texttt{Main} obsahuje metodu \texttt{main()}, která spouští node a také obsahuje interface k serveru.
