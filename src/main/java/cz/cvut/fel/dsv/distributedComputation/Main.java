@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.Properties;
 import java.util.Scanner;
 
 public class Main {
@@ -14,6 +15,11 @@ public class Main {
   private static final Scanner scanner = new Scanner(System.in);
 
   public static void main(String... args) {
+
+    Properties props = System.getProperties();
+    props.setProperty("rmi.client.timeout", "10");
+
+
     boolean run = true;
     while (run) {
       switch (printMenu()) {

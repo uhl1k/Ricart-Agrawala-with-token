@@ -214,9 +214,9 @@ public class Server {
     }
     synchronized (lock) {
       cs = false;
+      droppedNodes(dropped);
     }
     passToken();
-    droppedNodes(dropped);
   }
 
   public void receivedRequest(Remote remote, int clock) {
