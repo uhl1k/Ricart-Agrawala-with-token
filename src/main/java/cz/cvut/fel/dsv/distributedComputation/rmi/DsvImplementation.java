@@ -54,7 +54,7 @@ public class DsvImplementation extends UnicastRemoteObject implements DsvStub {
 
   @Override
   public void token() throws RemoteException {
-    Server.getInstance().generateToken();
+    Server.getInstance().receivedToken();
     System.out.println("Token received.");
   }
 
@@ -66,5 +66,10 @@ public class DsvImplementation extends UnicastRemoteObject implements DsvStub {
   @Override
   public int getVariable() {
     return Server.getInstance().getVariable();
+  }
+
+  @Override
+  public void gotToken(UUID uuid, int clock) {
+    Server.getInstance().nodeGotToken(uuid, clock);
   }
 }

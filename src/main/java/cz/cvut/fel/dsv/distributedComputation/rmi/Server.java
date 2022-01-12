@@ -32,7 +32,7 @@ public class Server {
 
   private InetAddress address;
 
-  private boolean token;
+  private volatile boolean token;
 
   private Registry localRegistry;
 
@@ -187,9 +187,12 @@ public class Server {
             dropped.add(r);
           }
         });
-        while (!token) {
-        }
       }
+    }
+    while (!token) {
+      System.out.println("waiting");
+    }
+    synchronized (lock) {
       cs = true;
     }
 
@@ -271,6 +274,19 @@ public class Server {
     token = true;
   }
 
+  public void receivedToken() {
+    generateToken();
+    var dropped = new ArrayList<Remote>();
+    remotes.forEach(r -> {
+      try {
+        r.getRemote().gotToken(uuid, clock);
+      } catch (RemoteException ex) {
+        dropped.add(r);
+      }
+    });
+    droppedNodes(dropped);
+  }
+
   public void removeRemote(InetAddress address) {
     var it = remotes.iterator();
     while (it.hasNext()) {
@@ -292,5 +308,9 @@ public class Server {
         }
       });
     });
+  }
+
+  public void nodeGotToken(UUID uuid, int clock) {
+    remotes.stream().filter(r -> r.getUuid().equals(uuid)).forEach(r -> r.setTokenAt(clock));
   }
 }
