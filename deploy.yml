@@ -1,12 +1,14 @@
+#deploy.yml
 - hosts: cluster
+  become: yes
   tasks:
 
-    - name: Remove old JAR
+    - name: "Remove old JAR"
       file:
         state: "absent"
-        path: ""
+        path: "sa"
 
-    - name: Copy new JAR
+    - name: "Copy new JAR"
       copy:
         src: "."
-        dest: ""
+        dest: "dsa"
